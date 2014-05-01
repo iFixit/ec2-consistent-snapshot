@@ -460,7 +460,7 @@ sub mysql_lock {
     # This might be a slave database already
     my $slave_status = $mysql_dbh->selectrow_hashref(q{ SHOW SLAVE STATUS });
     $mysql_logfile           = $slave_status->{Master_Log_File};
-    $mysql_position          = $slave_status->{Read_Master_Log_Pos};
+    $mysql_position          = $slave_status->{Exec_Master_Log_Pos};
     $mysql_binlog_do_db      = $slave_status->{Replicate_Do_DB};
     $mysql_binlog_ignore_db  = $slave_status->{Replicate_Ignore_DB};
 
