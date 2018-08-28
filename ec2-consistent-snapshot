@@ -651,6 +651,15 @@ sub mysql_lock {
       $lock_tries,
       $lock_sleep,
     );
+    # We need to lock the binlog wile we do the snapshot cause the snapshot
+    # and the binlog position saving don't happen at the exact same time.
+    sql_timeout_retry(
+      q{ LOCK BINLOG FOR BACKUP },
+      "Percona binlog lock",
+      $lock_timeout,
+      $lock_tries,
+      $lock_sleep,
+    );
   } elsif ( $mysql_stop_slave ) {
     # STOP SLAVE blocks until the current replication group is done processing
     # so we only really need to run it once with a high timeout
@@ -741,6 +750,9 @@ sub mysql_unlock {
      $mysql_dbh->do(q{ START SLAVE }) unless $Noaction;
   } else {
      $mysql_dbh->do(q{ UNLOCK TABLES }) unless $Noaction;
+     if ($percona ) {
+        $mysql_dbh->do(q{ UNLOCK BINLOG }) unless $Noaction;
+     }
   }
 
 }
